@@ -35,9 +35,9 @@
     <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 </head>
-<body class="flex flex-col h-screen w-full mx-auto text-dark">
+<body class="flex flex-col min-h-screen w-full mx-auto text-dark overflow-x-hidden">
 
-    <div class="flex-1 w-full max-w-4xl mx-auto p-4 sm:p-6 flex flex-col h-full">
+    <div class="flex-1 w-full max-w-4xl mx-auto p-3 sm:p-6 flex flex-col h-full">
         <!-- Cabecera -->
         <header class="flex flex-col sm:flex-row sm:justify-between items-center mb-6 bg-white p-4 rounded-3xl shadow-sm border-4 border-white gap-4">
             <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -70,7 +70,7 @@
             </div>
 
             <!-- Pista Visual -->
-            <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-md border-4 border-blue-200 text-center flex flex-col items-center justify-center min-h-[160px]">
+            <div class="bg-white w-full max-w-sm rounded-3xl p-4 sm:p-6 shadow-md border-4 border-blue-200 text-center flex flex-col items-center justify-center min-h-[140px] sm:min-h-[160px]">
                 <div id="visual-cue" class="text-8xl sm:text-9xl drop-shadow-md transition-all duration-300"></div>
             </div>
 

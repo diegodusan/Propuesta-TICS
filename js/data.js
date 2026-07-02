@@ -8,14 +8,14 @@ const gameData = [
         title: "Señales de Tránsito",
         icon: "🚦",
         levels: [
-            { emoji: "🛑", correct: ["El", "auto", "debe", "parar"], traps: ["hauto", "deve"] },
-            { emoji: "🚸", correct: ["Hay", "niños", "en", "la", "vía"], traps: ["Ay", "bia"] },
-            { emoji: "🚦", correct: ["Luz", "roja", "significa", "alto"], traps: ["Lus", "roha"] },
-            { emoji: "🚲", correct: ["Cuidado", "con", "las", "bicicletas"], traps: ["Kuidao", "vizicicletas"] },
-            { emoji: "🚶", correct: ["Camina", "por", "la", "acera"], traps: ["hasera", "Kamina"] },
-            { emoji: "⬇️", correct: ["Velocidad", "máxima", "muy", "baja"], traps: ["vaja", "Velosidad"] },
-            { emoji: "⚠️", correct: ["Aviso", "de", "peligro", "cerca"], traps: ["Abiso", "peligru"] },
-            { emoji: "🚳", correct: ["Prohibido", "pasear", "en", "bici"], traps: ["Proivido", "vici"] }
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c8/Colombia_road_sign_SR-01.svg/512px-Colombia_road_sign_SR-01.svg.png", correct: ["El", "auto", "debe", "parar"], traps: ["hauto", "deve"] },
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Colombia_road_sign_SP-47.svg/512px-Colombia_road_sign_SP-47.svg.png", correct: ["Hay", "niños", "en", "la", "vía"], traps: ["Ay", "bia"] },
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Colombia_road_sign_SP-23.svg/512px-Colombia_road_sign_SP-23.svg.png", correct: ["Luz", "roja", "significa", "alto"], traps: ["Lus", "roha"] },
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/Colombia_road_sign_SR-02.svg/512px-Colombia_road_sign_SR-02.svg.png", correct: ["Ceda", "el", "paso", "al", "peatón"], traps: ["Seda", "peathon"] },
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/d4/Colombia_road_sign_SR-03.svg/512px-Colombia_road_sign_SR-03.svg.png", correct: ["Sigue", "de", "frente", "solamente"], traps: ["Sige", "frennte"] },
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/f6/Colombia_road_sign_SR-30_%2830%29.svg/512px-Colombia_road_sign_SR-30_%2830%29.svg.png", correct: ["Velocidad", "máxima", "muy", "baja"], traps: ["vaja", "Velosidad"] },
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/07/Colombia_road_sign_SR-05.svg/512px-Colombia_road_sign_SR-05.svg.png", correct: ["Prohibido", "girar", "a", "la", "izquierda"], traps: ["Proivido", "hizquierda"] },
+            { image: "https://upload.wikimedia.org/wikipedia/commons/thumb/8/89/Colombia_road_sign_SR-04.svg/512px-Colombia_road_sign_SR-04.svg.png", correct: ["No", "pase", "por", "esta", "vía"], traps: ["pasee", "bía"] }
         ]
     },
     {

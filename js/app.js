@@ -84,10 +84,16 @@ function loadQuestion() {
     // UI Updates
     moduleTitle.innerText = `Módulo ${currentModuleIndex + 1}: ${module.title}`;
     
-    // Animación del Emoji Visual
+    // Animación del Emoji Visual o Imagen
     visualCue.style.transform = 'scale(0)';
     setTimeout(() => {
-        visualCue.innerText = question.emoji;
+        if (question.image) {
+            visualCue.innerHTML = `<img src="${question.image}" alt="Señal" class="h-32 object-contain drop-shadow-md mx-auto">`;
+            visualCue.classList.remove('text-8xl', 'sm:text-9xl'); // Quitar clases de texto grande si es imagen
+        } else {
+            visualCue.innerHTML = question.emoji;
+            visualCue.classList.add('text-8xl', 'sm:text-9xl');
+        }
         visualCue.style.transform = 'scale(1.2)';
         setTimeout(() => visualCue.style.transform = 'scale(1)', 200);
     }, 200);

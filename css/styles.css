@@ -167,3 +167,25 @@ body {
 .floating {
     animation: float 3s ease-in-out infinite;
 }
+
+/* Transición de módulo */
+@keyframes slideOutLeft {
+    to { transform: translateX(-100vw) scale(0.8); opacity: 0; }
+}
+@keyframes slideInRight {
+    from { transform: translateX(100vw) scale(0.8); opacity: 0; }
+    to { transform: translateX(0) scale(1); opacity: 1; }
+}
+
+.slide-out { animation: slideOutLeft 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards; }
+.slide-in { animation: slideInRight 0.6s cubic-bezier(0.87, 0, 0.13, 1) forwards; }
+
+/* Animación de racha (Streak) */
+@keyframes fire-glow {
+    0%, 100% { filter: drop-shadow(0 0 10px #facc15) drop-shadow(0 0 20px #fb923c); transform: scale(1); }
+    50% { filter: drop-shadow(0 0 20px #facc15) drop-shadow(0 0 40px #ef4444); transform: scale(1.1); }
+}
+
+.streak-fire {
+    animation: fire-glow 1.5s ease-in-out infinite;
+}

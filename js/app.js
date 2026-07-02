@@ -2,6 +2,7 @@
 let currentModuleIndex = 0;
 let currentQuestionIndex = 0;
 let score = 0;
+let consecutiveWins = 0;
 let sortableBank = null;
 let sortableSlots = []; // Array de instancias sortable para cada casilla
 
@@ -15,6 +16,13 @@ const checkBtn = document.getElementById('check-btn');
 const scoreDisplay = document.getElementById('score-display');
 const progressBar = document.getElementById('progress-bar');
 const moduleIndicators = document.getElementById('module-indicators');
+const mainArea = document.querySelector('main');
+
+// Audios
+const sfxSuccess = document.getElementById('sfx-success');
+const sfxError = document.getElementById('sfx-error');
+const sfxModule = document.getElementById('sfx-module');
+const sfxStreak = document.getElementById('sfx-streak');
 
 // Inicialización
 function initGame() {
@@ -200,7 +208,18 @@ function validateAnswer() {
     if (isCorrect) {
         // ÉXITO
         score += 50;
-        instructorText.innerText = "¡Excelente trabajo! 🎉";
+        consecutiveWins++;
+        
+        if (consecutiveWins >= 2) {
+            if(sfxStreak) sfxStreak.play().catch(e => {});
+            visualCue.classList.add('streak-fire');
+            instructorText.innerText = `¡Racha de ${consecutiveWins} aciertos! 🔥`;
+        } else {
+            if(sfxSuccess) sfxSuccess.play().catch(e => {});
+            instructorText.innerText = "¡Excelente trabajo! 🎉";
+            visualCue.classList.remove('streak-fire');
+        }
+        
         instructorText.className = "text-sm font-bold text-success";
         
         // Animar correctos
@@ -214,30 +233,51 @@ function validateAnswer() {
         updateScoreUI();
         
         // Deshabilitar Drag mientras cambia
-        sortableBank.options.disabled = true;
+        if(sortableBank) sortableBank.options.disabled = true;
         sortableSlots.forEach(s => s.options.disabled = true);
 
         setTimeout(() => {
             currentQuestionIndex++;
+            saveProgress();
+            
             if (currentQuestionIndex >= module.levels.length) {
                 // Siguiente módulo
                 currentModuleIndex++;
                 currentQuestionIndex = 0;
-                renderModuleIndicators();
-                triggerConfetti(true); // Super confetti de módulo
-            }
-            
-            saveProgress();
-            
-            if (currentModuleIndex < gameData.length) {
-                loadQuestion();
+                consecutiveWins = 0;
+                visualCue.classList.remove('streak-fire');
+                saveProgress();
+                
+                if (currentModuleIndex < gameData.length) {
+                    // Animación de transición de módulo
+                    mainArea.classList.add('slide-out');
+                    if(sfxModule) sfxModule.play().catch(e => {});
+                    
+                    setTimeout(() => {
+                        mainArea.classList.remove('slide-out');
+                        mainArea.classList.add('slide-in');
+                        renderModuleIndicators();
+                        triggerConfetti(true);
+                        loadQuestion();
+                        
+                        setTimeout(() => {
+                            mainArea.classList.remove('slide-in');
+                        }, 600);
+                    }, 600);
+                } else {
+                    showEndScreen();
+                }
             } else {
-                showEndScreen();
+                loadQuestion();
             }
         }, 1500);
 
     } else {
         // ERROR
+        consecutiveWins = 0;
+        visualCue.classList.remove('streak-fire');
+        if(sfxError) sfxError.play().catch(e => {});
+        
         instructorText.innerText = "¡Ups! Intenta de nuevo.";
         instructorText.className = "text-sm font-bold text-accent";
         

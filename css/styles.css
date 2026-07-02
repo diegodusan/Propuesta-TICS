@@ -1,0 +1,156 @@
+/* Estilos base para evitar comportamientos nativos no deseados en móviles */
+body {
+    overscroll-behavior: none;
+    touch-action: none;
+    background-color: #e0f2fe; /* bg-blue-100 */
+    background-image: radial-gradient(#bae6fd 2px, transparent 2px);
+    background-size: 30px 30px;
+}
+
+/* Efectos 3D y de Gomita para botones */
+.btn-3d {
+    border-radius: 2rem;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.15);
+    transition: all 0.1s ease-in-out;
+    cursor: pointer;
+    user-select: none;
+}
+
+.btn-3d:active, .btn-3d.active-press {
+    transform: translateY(8px);
+    box-shadow: 0 0px 0 rgba(0,0,0,0.15);
+}
+
+/* Estilo general para las palabras (Word Cards) */
+.word-card {
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+    background-color: white;
+    font-weight: 800;
+    font-size: 1.5rem;
+    padding: 0.5rem 1.5rem;
+    border: 3px solid #cbd5e1;
+    color: #334155;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    white-space: nowrap;
+    cursor: grab;
+    user-select: none;
+    touch-action: none; /* Importante para SortableJS en móviles */
+    transition: transform 0.2s;
+    margin: 0.25rem;
+}
+
+/* Clases que inyecta SortableJS cuando se agarra un elemento */
+.sortable-ghost {
+    opacity: 0.4;
+    background-color: #f8fafc;
+}
+
+.sortable-drag {
+    cursor: grabbing !important;
+    transform: scale(1.1) rotate(3deg);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.2) !important;
+    border-color: #38bdf8 !important;
+    z-index: 9999;
+}
+
+/* Las casillas destino */
+.slot-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    min-height: 4.5rem;
+}
+
+.slot {
+    border-radius: 1.5rem;
+    border: 4px dashed #94a3b8;
+    background-color: rgba(255,255,255,0.5);
+    min-height: 4rem;
+    min-width: 6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    padding: 0.25rem;
+}
+
+.slot.hovered, .slot.sortable-drag {
+    background-color: #bae6fd;
+    border-color: #38bdf8;
+    transform: scale(1.05);
+}
+
+/* Contenedor del banco de palabras */
+.word-bank {
+    min-height: 120px;
+    width: 100%;
+    background-color: rgba(255,255,255,0.4);
+    border-radius: 2rem;
+    border: 3px solid #e2e8f0;
+    padding: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Barra de progreso */
+.progress-container {
+    width: 100%;
+    height: 1rem;
+    background-color: #e2e8f0;
+    border-radius: 1rem;
+    overflow: hidden;
+    margin-top: 0.5rem;
+    border: 2px solid white;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #facc15;
+    width: 0%;
+    transition: width 0.5s ease-in-out;
+}
+
+/* Animaciones */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-10px) rotate(-5deg); }
+    50% { transform: translateX(10px) rotate(5deg); }
+    75% { transform: translateX(-10px) rotate(-5deg); }
+}
+
+.shake-error {
+    animation: shake 0.4s ease-in-out;
+    background-color: #fca5a5 !important;
+    border-color: #ef4444 !important;
+    color: white !important;
+}
+
+@keyframes pulse-success {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); background-color: #86efac; border-color: #22c55e;}
+    100% { transform: scale(1); }
+}
+
+.success-anim {
+    animation: pulse-success 0.6s ease-in-out;
+    background-color: #dcfce7 !important;
+    border-color: #22c55e !important;
+}
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.floating {
+    animation: float 3s ease-in-out infinite;
+}

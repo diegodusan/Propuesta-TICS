@@ -70,7 +70,7 @@ body {
     border-radius: 1.5rem;
     border: 4px dashed #94a3b8;
     background-color: rgba(255,255,255,0.5);
-    min-height: 4rem;
+    min-height: 3.5rem;
     min-width: 5rem;
     display: flex;
     align-items: center;
@@ -86,7 +86,7 @@ body {
     }
     .slot {
         min-width: 4rem;
-        min-height: 3.5rem;
+        min-height: 3rem;
         border-radius: 1rem;
         border-width: 3px;
     }
@@ -100,7 +100,7 @@ body {
 
 /* Contenedor del banco de palabras */
 .word-bank {
-    min-height: 120px;
+    min-height: 90px;
     width: 100%;
     background-color: rgba(255,255,255,0.4);
     border-radius: 2rem;

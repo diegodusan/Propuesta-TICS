@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Misión Tránsito y Leyendas</title>
+    
+    <!-- Fuentes amigables -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS (Agiliza layout y estilos básicos) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Confetti para celebración -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <!-- Configuración de Tailwind -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#38bdf8', // Azul cielo
+                        secondary: '#facc15', // Amarillo sol
+                        accent: '#fb7185', // Rojo brillante amigable
+                        success: '#4ade80', // Verde menta
+                        dark: '#1e293b'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* ESTILOS PERSONALIZADOS (UI Infantil) */
+        
+        body {
+            /* Previene el "pull-to-refresh" y gestos raros en tablets */
+            overscroll-behavior: none;
+            touch-action: none;
+            background-color: #e0f2fe;
+            background-image: radial-gradient(#bae6fd 2px, transparent 2px);
+            background-size: 30px 30px;
+        }
+
+        /* Botones y tarjetas 3D "aplastables" */
+        .btn-3d {
+            border-radius: 2rem;
+            box-shadow: 0 8px 0 rgba(0,0,0,0.15);
+            transition: all 0.1s ease-in-out;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .btn-3d:active, .btn-3d.active-press {
+            transform: translateY(8px);
+            box-shadow: 0 0px 0 rgba(0,0,0,0.15);
+        }
+
+        /* Tarjeta de palabra arrastrable */
+        .word-card {
+            border-radius: 1.5rem;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+            user-select: none;
+            touch-action: none;
+            cursor: grab;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: absolute; /* Para el drag libre */
+            z-index: 10;
+            background-color: white;
+            font-weight: 800;
+            font-size: 1.5rem;
+            padding: 0.5rem 1.5rem;
+            border: 3px solid #cbd5e1;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .word-card.dragging {
+            cursor: grabbing;
+            transform: scale(1.1) rotate(2deg);
+            box-shadow: 0 15px 25px rgba(0,0,0,0.2);
+            z-index: 100;
+            border-color: #38bdf8;
+        }
+
+        /* Casillas vacías donde encajan las palabras */
+        .slot {
+            border-radius: 1.5rem;
+            border: 4px dashed #94a3b8;
+            background-color: rgba(255,255,255,0.5);
+            min-height: 4rem;
+            min-width: 6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .slot.hovered {
+            background-color: #bae6fd;
+            border-color: #38bdf8;
+            transform: scale(1.05);
+        }
+
+        /* Animaciones de error (Shake) y éxito (Bounce) */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px) rotate(-5deg); }
+            50% { transform: translateX(10px) rotate(5deg); }
+            75% { transform: translateX(-10px) rotate(-5deg); }
+        }
+        
+        .shake-error {
+            animation: shake 0.4s ease-in-out;
+            background-color: #fca5a5 !important;
+            border-color: #ef4444 !important;
+            color: white !important;
+        }
+
+        @keyframes pulse-success {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); background-color: #86efac; border-color: #22c55e;}
+            100% { transform: scale(1); }
+        }
+        
+        .success-anim {
+            animation: pulse-success 0.6s ease-in-out;
+        }
+        
+        /* Animación de elementos flotando (Mascota) */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Ocultar el layout inicial de las tarjetas arrastrables en el dom (las manejamos via JS absoluto) */
+        #word-bank-container {
+            position: relative;
+            min-height: 120px;
+            width: 100%;
+            background-color: rgba(255,255,255,0.4);
+            border-radius: 2rem;
+            border: 3px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-full max-w-4xl mx-auto p-4 sm:p-6 text-dark overflow-hidden">
+
+    <!-- AUDIOS (Se dejan preparados con urls de placeholders o comentados para reemplazar) -->
+    <!-- <audio id="audio-success" src="https://assets.mixkit.co/sfx/preview/mixkit-software-interface-start-2574.mp3"></audio> -->
+    <!-- <audio id="audio-error" src="https://assets.mixkit.co/sfx/preview/mixkit-click-error-1110.mp3"></audio> -->
+    <!-- Como no siempre hay internet, simularemos sonido con visuales por ahora -->
+
+    <!-- Cabecera: Mascota y Progreso -->
+    <header class="flex justify-between items-center mb-6 bg-white p-4 rounded-3xl shadow-sm border-4 border-white">
+        <div class="flex items-center gap-3">
+            <div class="text-5xl floating">🦉</div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-black text-primary leading-tight">Misión Tránsito <br> y Leyendas</h1>
+                <p id="instructor-text" class="text-sm font-bold text-gray-500">¡Arma la oración correcta!</p>
+            </div>
+        </div>
+        
+        <!-- Sistema visual de progreso (Estrellitas) -->
+        <div class="flex flex-col items-end gap-2">
+            <div id="stars-container" class="flex gap-1 text-3xl">
+                <!-- Se llenan por JS -->
+            </div>
+            <div class="bg-secondary text-dark font-black px-4 py-1 rounded-full text-sm">
+                Puntos: <span id="score-display">0</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Área Principal de Juego -->
+    <main class="flex-1 flex flex-col items-center justify-between gap-4">
+        
+        <!-- Pista Visual (Icono/Emoji grande) -->
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-md border-4 border-blue-200 text-center flex flex-col items-center justify-center">
+            <h2 id="module-title" class="text-lg font-bold text-gray-400 uppercase tracking-widest mb-2">Módulo 1</h2>
+            <div id="visual-cue" class="text-8xl sm:text-9xl drop-shadow-md transition-all duration-300">🚦</div>
+        </div>
+
+        <!-- Zona de Construcción (Casillas) -->
+        <div id="construction-zone" class="flex flex-wrap justify-center gap-3 w-full py-4 min-h-[5rem]">
+            <!-- Las casillas se generan via JS según el nivel -->
+        </div>
+
+        <!-- Caja de Palabras -->
+        <div class="w-full mt-auto">
+            <p class="text-center font-bold text-gray-500 mb-2">Arrastra las palabras hacia arriba</p>
+            <div id="word-bank-container">
+                <!-- Las palabras se generan via JS y se posicionan de forma absoluta -->
+            </div>
+        </div>
+
+        <!-- Botón de Validación -->
+        <button id="check-btn" class="w-full btn-3d bg-success text-white font-black text-3xl py-4 mt-6 border-b-[8px] border-green-600 mb-4 flex items-center justify-center gap-2">
+            <span class="text-3xl">✅</span> ¡Revisar!
+        </button>
+    </main>
+
+    <!-- Script de Juego -->
+    <script>
+        /**
+         * ESTRUCTURA DE DATOS (NIVELES)
+         * Fácilmente escalable. Para agregar un nivel nuevo de "Historietas", solo agrega un objeto aquí.
+         */
+        const gameLevels = [
+            {
+                id: 1,
+                module: "Señales de Tránsito",
+                emoji: "🚦",
+                correctWords: ["El", "semáforo", "rojo"],
+                trapWords: ["semaforo", "roho"]
+            },
+            {
+                id: 2,
+                module: "Textos Instructivos",
+                emoji: "🧼",
+                correctWords: ["Lava", "tus", "manos", "bien"],
+                trapWords: ["Laba", "vus"]
+            },
+            {
+                id: 3,
+                module: "Relatos Mitológicos",
+                emoji: "👻",
+                correctWords: ["La", "leyenda", "es", "mágica"],
+                trapWords: ["leyemda", "majica"]
+            }
+        ];
+
+        // VARIABLES DE ESTADO
+        let currentLevelIndex = 0;
+        let score = 0;
+        let completedLevels = []; 
+        let wordsData = []; // Para trackear posición lógica de cada palabra
+        
+        // ELEMENTOS DEL DOM
+        const visualCue = document.getElementById('visual-cue');
+        const moduleTitle = document.getElementById('module-title');
+        const constructionZone = document.getElementById('construction-zone');
+        const wordBankContainer = document.getElementById('word-bank-container');
+        const checkBtn = document.getElementById('check-btn');
+        const scoreDisplay = document.getElementById('score-display');
+        const starsContainer = document.getElementById('stars-container');
+        const instructorText = document.getElementById('instructor-text');
+
+        // INICIALIZACIÓN (Carga desde localStorage)
+        function initGame() {
+            const savedData = localStorage.getItem('aventuraNaturalSave');
+            if (savedData) {
+                const parsed = JSON.parse(savedData);
+                currentLevelIndex = parsed.currentLevelIndex || 0;
+                score = parsed.score || 0;
+                completedLevels = parsed.completedLevels || [];
+                
+                // Si ya completó todos, reiniciar por ahora (o podrías mostrar pantalla de fin)
+                if(currentLevelIndex >= gameLevels.length) {
+                    currentLevelIndex = 0;
+                    score = 0;
+                    completedLevels = [];
+                }
+            }
+            
+            updateScoreUI();
+            loadLevel(currentLevelIndex);
+        }
+
+        // GUARDADO DEL PROGRESO
+        function saveProgress() {
+            const data = {
+                currentLevelIndex,
+                score,
+                completedLevels
+            };
+            localStorage.setItem('aventuraNaturalSave', JSON.stringify(data));
+        }
+
+        function updateScoreUI() {
+            scoreDisplay.innerText = score;
+            
+            // Dibujar estrellitas
+            starsContainer.innerHTML = '';
+            gameLevels.forEach((level, index) => {
+                const star = document.createElement('span');
+                if (index < currentLevelIndex) {
+                    star.innerText = '⭐'; // Brillante
+                } else {
+                    star.innerText = '★'; // Gris/Apagada
+                    star.className = 'text-gray-300';
+                }
+                starsContainer.appendChild(star);
+            });
+        }
+
+        // CARGA DE UN NIVEL ESPECÍFICO
+        function loadLevel(index) {
+            const level = gameLevels[index];
+            moduleTitle.innerText = `Módulo ${level.id}: ${level.module}`;
+            
+            // Animación de entrada visual
+            visualCue.style.transform = 'scale(0)';
+            setTimeout(() => {
+                visualCue.innerText = level.emoji;
+                visualCue.style.transform = 'scale(1.2)';
+                setTimeout(() => visualCue.style.transform = 'scale(1)', 200);
+            }, 200);
+            
+            instructorText.innerText = "¡Arma la oración correcta!";
+            instructorText.classList.remove('text-success', 'text-accent');
+            instructorText.classList.add('text-gray-500');
+
+            // Limpiar zonas
+            constructionZone.innerHTML = '';
+            wordBankContainer.innerHTML = '';
+            wordsData = [];
+
+            // Crear casillas (slots)
+            for (let i = 0; i < level.correctWords.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'slot w-24 sm:w-32';
+                slot.dataset.slotIndex = i;
+                constructionZone.appendChild(slot);
+            }
+
+            // Preparar todas las palabras (correctas + trampas) y mezclarlas
+            let allWords = [...level.correctWords, ...level.trapWords];
+            allWords = allWords.sort(() => Math.random() - 0.5); // Shuffle simple
+
+            // Crear elementos de palabras
+            allWords.forEach((wordText, i) => {
+                const wordEl = document.createElement('div');
+                wordEl.className = 'word-card';
+                wordEl.innerText = wordText;
+                wordEl.dataset.text = wordText;
+                wordEl.dataset.id = `word-${i}`;
+                
+                // Las agregamos al contenedor del banco para que estén en el DOM
+                wordBankContainer.appendChild(wordEl);
+                
+                // Trackeo lógico
+                wordsData.push({
+                    el: wordEl,
+                    text: wordText,
+                    currentSlot: null, // null = está en el banco
+                    id: `word-${i}`
+                });
+            });
+
+            // Dar un poco de tiempo para que el layout se calcule y posicionarlas
+            setTimeout(arrangeWordsInBank, 50);
+            
+            // Configurar validación
+            checkBtn.onclick = validateLevel;
+        }
+
+        // --- SISTEMA DE DRAG AND DROP (TOUCH & MOUSE) ---
+        // Se utiliza posicionamiento absoluto y PointerEvents para asegurar que funcione en iPads
+        
+        let activeDrag = null;
+        let startX = 0, startY = 0;
+        let initialLeft = 0, initialTop = 0;
+
+        function arrangeWordsInBank() {
+            // Repartir las palabras dentro del wordBankContainer visualmente
+            const bankRect = wordBankContainer.getBoundingClientRect();
+            const padding = 10;
+            
+            // Un layout sencillo en grid imaginario
+            let xOffset = padding;
+            let yOffset = padding;
+            let rowHeight = 0;
+
+            wordsData.forEach(wd => {
+                if (wd.currentSlot !== null) return; // Ya está en una casilla
+                
+                const el = wd.el;
+                const rect = el.getBoundingClientRect();
+                
+                if (xOffset + rect.width > bankRect.width - padding) {
+                    xOffset = padding;
+                    yOffset += rowHeight + padding;
+                    rowHeight = 0;
+                }
+                
+                // Posicionar relativas al contenedor
+                el.style.left = `${xOffset}px`;
+                el.style.top = `${yOffset}px`;
+                el.style.transform = ''; // resetear transforms
+                
+                xOffset += rect.width + padding;
+                rowHeight = Math.max(rowHeight, rect.height);
+                
+                // Agregar listeners solo si no los tiene (se re-ejecuta esto al retornar palabras)
+                el.onpointerdown = handlePointerDown;
+            });
+        }
+
+        function handlePointerDown(e) {
+            if(e.button && e.button !== 0) return; // Solo click izquierdo
+            
+            activeDrag = wordsData.find(w => w.el === e.currentTarget);
+            if (!activeDrag) return;
+            
+            const el = activeDrag.el;
+            e.preventDefault(); // Evita scroll en móviles
+            el.setPointerCapture(e.pointerId);
+
+            // Preparar elemento para arrastre (siempre lo movemos al body para que pase por encima de todo)
+            const rect = el.getBoundingClientRect();
+            
+            // Si estaba en un slot, desvincularlo lógicamente
+            if (activeDrag.currentSlot !== null) {
+                const slotDiv = constructionZone.children[activeDrag.currentSlot];
+                if(slotDiv) slotDiv.classList.remove('has-word');
+                activeDrag.currentSlot = null;
+            }
+
+            // Cambiamos parent al body para arrastre libre y absoluto real
+            document.body.appendChild(el);
+            
+            // Ajustamos posición para que coincida donde estaba visualmente
+            el.style.left = `${rect.left}px`;
+            el.style.top = `${rect.top}px`;
+            el.classList.add('dragging');
+
+            startX = e.clientX;
+            startY = e.clientY;
+            initialLeft = rect.left;
+            initialTop = rect.top;
+
+            el.onpointermove = handlePointerMove;
+            el.onpointerup = handlePointerUp;
+            el.onpointercancel = handlePointerUp;
+        }
+
+        function handlePointerMove(e) {
+            if (!activeDrag) return;
+            const el = activeDrag.el;
+            
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+            
+            el.style.left = `${initialLeft + dx}px`;
+            el.style.top = `${initialTop + dy}px`;
+
+            // Detectar hover sobre casillas
+            const slots = document.querySelectorAll('.slot');
+            slots.forEach(slot => slot.classList.remove('hovered'));
+            
+            const targetSlot = getDropSlot(e.clientX, e.clientY);
+            if (targetSlot) {
+                targetSlot.classList.add('hovered');
+            }
+        }
+
+        function handlePointerUp(e) {
+            if (!activeDrag) return;
+            const el = activeDrag.el;
+            
+            el.onpointermove = null;
+            el.onpointerup = null;
+            el.onpointercancel = null;
+            el.classList.remove('dragging');
+            el.releasePointerCapture(e.pointerId);
+
+            const targetSlot = getDropSlot(e.clientX, e.clientY);
+            
+            // Limpiar hovers
+            document.querySelectorAll('.slot').forEach(s => s.classList.remove('hovered'));
+
+            if (targetSlot) {
+                // Si el slot ya tiene una palabra, intercambiar o devolver al banco (por simplicidad, devolveremos al banco la que ya estaba)
+                const slotIndex = parseInt(targetSlot.dataset.slotIndex);
+                const existingWord = wordsData.find(w => w.currentSlot === slotIndex);
+                
+                if (existingWord) {
+                    existingWord.currentSlot = null;
+                    wordBankContainer.appendChild(existingWord.el);
+                }
+
+                // Snap al slot
+                const slotRect = targetSlot.getBoundingClientRect();
+                const scrollX = window.scrollX || document.documentElement.scrollLeft;
+                const scrollY = window.scrollY || document.documentElement.scrollTop;
+
+                // Movemos visualmente al body por encima, pero centrado en el slot
+                // (Podríamos meterlo dentro del dom del slot, pero mantener abs layout evita reflows raros)
+                
+                el.style.left = `${slotRect.left + scrollX + (slotRect.width - el.offsetWidth)/2}px`;
+                el.style.top = `${slotRect.top + scrollY + (slotRect.height - el.offsetHeight)/2}px`;
+                
+                activeDrag.currentSlot = slotIndex;
+            } else {
+                // Devolver al banco
+                activeDrag.currentSlot = null;
+                wordBankContainer.appendChild(el);
+            }
+
+            // Reposicionar banco
+            arrangeWordsInBank();
+            
+            // Actualizar posiciones absolutas de las palabras que están en slots al cambiar tamaño de ventana
+            updateSlotWordPositions();
+            
+            activeDrag = null;
+        }
+
+        // Función de utilidad para ver si soltamos encima de una casilla
+        function getDropSlot(clientX, clientY) {
+            // Ocultar temporalmente el elemento arrastrado para que document.elementFromPoint no lo detecte a él mismo
+            if(activeDrag) activeDrag.el.style.display = 'none';
+            const elementBelow = document.elementFromPoint(clientX, clientY);
+            if(activeDrag) activeDrag.el.style.display = ''; // restaurar
+
+            if (!elementBelow) return null;
+            return elementBelow.closest('.slot');
+        }
+        
+        // Mantiene pegadas las palabras a sus slots si la pantalla cambia de tamaño
+        window.addEventListener('resize', () => {
+            arrangeWordsInBank();
+            updateSlotWordPositions();
+        });
+
+        function updateSlotWordPositions() {
+            wordsData.forEach(wd => {
+                if (wd.currentSlot !== null) {
+                    const slotDiv = constructionZone.children[wd.currentSlot];
+                    if (slotDiv) {
+                        const slotRect = slotDiv.getBoundingClientRect();
+                        const el = wd.el;
+                        const scrollX = window.scrollX;
+                        const scrollY = window.scrollY;
+                        el.style.left = `${slotRect.left + scrollX + (slotRect.width - el.offsetWidth)/2}px`;
+                        el.style.top = `${slotRect.top + scrollY + (slotRect.height - el.offsetHeight)/2}px`;
+                    }
+                }
+            });
+        }
+
+
+        // VALIDACIÓN DEL NIVEL
+        function validateLevel() {
+            const level = gameLevels[currentLevelIndex];
+            const requiredLength = level.correctWords.length;
+            
+            // Obtener palabras puestas ordenadas por slotIndex
+            let placedWords = wordsData.filter(w => w.currentSlot !== null)
+                                       .sort((a, b) => a.currentSlot - b.currentSlot);
+            
+            // Animar botón
+            checkBtn.classList.add('active-press');
+            setTimeout(() => checkBtn.classList.remove('active-press'), 150);
+
+            if (placedWords.length !== requiredLength) {
+                // Faltan palabras
+                instructorText.innerText = "¡Te faltan casillas por llenar!";
+                instructorText.classList.add('text-accent');
+                return;
+            }
+
+            let isCorrect = true;
+            let wrongElements = [];
+
+            for (let i = 0; i < requiredLength; i++) {
+                if (placedWords[i].text !== level.correctWords[i]) {
+                    isCorrect = false;
+                    wrongElements.push(placedWords[i].el);
+                }
+            }
+
+            if (isCorrect) {
+                // ÉXITO
+                score += 100;
+                instructorText.innerText = "¡Excelente trabajo! 🎉";
+                instructorText.className = "text-sm font-bold text-success";
+                
+                // Animar casillas
+                placedWords.forEach(w => {
+                    w.el.classList.add('success-anim');
+                    w.el.style.borderColor = '#22c55e';
+                    w.el.style.backgroundColor = '#dcfce7';
+                });
+                
+                triggerConfetti();
+                
+                setTimeout(() => {
+                    currentLevelIndex++;
+                    saveProgress();
+                    
+                    if (currentLevelIndex < gameLevels.length) {
+                        loadLevel(currentLevelIndex);
+                    } else {
+                        // FIN DEL JUEGO
+                        moduleTitle.innerText = "¡Misión Cumplida!";
+                        visualCue.innerText = "🏆";
+                        constructionZone.innerHTML = '<p class="text-2xl font-black text-primary text-center">¡Eres un experto!</p>';
+                        wordBankContainer.innerHTML = '';
+                        checkBtn.style.display = 'none';
+                        triggerConfetti(true);
+                        // Resetear para próxima visita
+                        currentLevelIndex = 0; 
+                        saveProgress();
+                    }
+                }, 2000);
+
+            } else {
+                // ERROR
+                instructorText.innerText = "¡Ups! Revisa las palabras en rojo.";
+                instructorText.className = "text-sm font-bold text-accent";
+                
+                wrongElements.forEach(el => {
+                    el.classList.add('shake-error');
+                    
+                    setTimeout(() => {
+                        el.classList.remove('shake-error');
+                        // Devolver la palabra incorrecta al banco
+                        const wd = wordsData.find(w => w.el === el);
+                        if(wd) {
+                            wd.currentSlot = null;
+                            wordBankContainer.appendChild(el);
+                        }
+                        arrangeWordsInBank();
+                    }, 500); // Luego de que termine el shake
+                });
+            }
+        }
+
+        // CONFETTI EFECTO
+        function triggerConfetti(massive = false) {
+            const duration = massive ? 3000 : 1.5 * 1000;
+            const end = Date.now() + duration;
+
+            (function frame() {
+                confetti({
+                    particleCount: massive ? 5 : 3,
+                    angle: 60,
+                    spread: 55,
+                    origin: { x: 0 },
+                    colors: ['#38bdf8', '#facc15', '#fb7185', '#4ade80']
+                });
+                confetti({
+                    particleCount: massive ? 5 : 3,
+                    angle: 120,
+                    spread: 55,
+                    origin: { x: 1 },
+                    colors: ['#38bdf8', '#facc15', '#fb7185', '#4ade80']
+                });
+
+                if (Date.now() < end) {
+                    requestAnimationFrame(frame);
+                }
+            }());
+        }
+
+        // Arrancar juego
+        initGame();
+
+    </script>
+</body>
+</html>

@@ -189,3 +189,43 @@ body {
 .streak-fire {
     animation: fire-glow 1.5s ease-in-out infinite;
 }
+
+/* Utilidades y Pantallas */
+.hidden {
+    display: none !important;
+}
+
+.module-card {
+    background-color: white;
+    border-radius: 1.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.1);
+    border: 3px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 0 rgba(0,0,0,0.1);
+    border-color: #38bdf8;
+}
+
+.module-card:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+}
+
+.animal-anim {
+    animation: bounce-soft 2s infinite ease-in-out;
+}
+
+@keyframes bounce-soft {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-15px); }
+}
+
+.speech-bubble {
+    z-index: 10;
+}

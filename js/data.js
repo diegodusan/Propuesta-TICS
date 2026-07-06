@@ -7,6 +7,12 @@ const gameData = [
         id: "modulo-1",
         title: "Señales de Tránsito",
         icon: "🚦",
+        lesson: {
+            animal: "🐶",
+            animalName: "Beto el Perro",
+            text: "¡Hola! Soy Beto. Antes de jugar, recuerda que las señales rojas nos indican prohibición o que debemos parar. ¡Presta mucha atención a la forma y color de cada señal!",
+            voiceParams: { pitch: 0.9, rate: 1.1, voiceIndex: 0 }
+        },
         levels: [
             {
                 // PARE
@@ -56,6 +62,12 @@ const gameData = [
         id: "modulo-2",
         title: "Textos Instructivos",
         icon: "📋",
+        lesson: {
+            animal: "🦊",
+            animalName: "Fito el Zorro",
+            text: "¡Qué tal! Soy Fito. Los textos instructivos nos dicen paso a paso cómo hacer algo, como lavarnos las manos o armar un juguete. ¡Ordenemos estas oraciones!",
+            voiceParams: { pitch: 1.6, rate: 1.2, voiceIndex: 1 }
+        },
         levels: [
             { emoji: "🧼", correct: ["Lava", "tus", "manos", "bien"], traps: ["Laba", "vus"] },
             { emoji: "🪥", correct: ["Cepilla", "tus", "dientes", "hoy"], traps: ["Sepilla", "oy"] },
@@ -71,6 +83,12 @@ const gameData = [
         id: "modulo-3",
         title: "Relatos Mitológicos",
         icon: "👻",
+        lesson: {
+            animal: "🦉",
+            animalName: "Oli el Búho",
+            text: "¡Saludos! Soy Oli. Los relatos mitológicos y las leyendas están llenos de magia, criaturas fantásticas y misterios. ¡Vamos a descubrir estas oraciones mágicas!",
+            voiceParams: { pitch: 0.4, rate: 0.85, voiceIndex: 2 }
+        },
         levels: [
             { emoji: "🎩", correct: ["La", "leyenda", "es", "mágica"], traps: ["leyemda", "majica"] },
             { emoji: "👻", correct: ["El", "fantasma", "asusta", "mucho"], traps: ["famtasma", "asuzta"] },

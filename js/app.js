@@ -18,6 +18,20 @@ const progressBar = document.getElementById('progress-bar');
 const moduleIndicators = document.getElementById('module-indicators');
 const mainArea = document.querySelector('main');
 
+// Pantallas
+const screenSelection = document.getElementById('screen-selection');
+const screenLesson = document.getElementById('screen-lesson');
+const screenGame = document.getElementById('screen-game');
+
+// Selección
+const moduleGrid = document.getElementById('module-grid');
+
+// Lección
+const lessonTitle = document.getElementById('lesson-title');
+const lessonText = document.getElementById('lesson-text');
+const lessonAnimal = document.getElementById('lesson-animal');
+const btnStartGame = document.getElementById('btn-start-game');
+
 // Audios
 const sfxSuccess = document.getElementById('sfx-success');
 const sfxError = document.getElementById('sfx-error');
@@ -29,24 +43,101 @@ function initGame() {
     const savedData = localStorage.getItem('misionTransitoSave');
     if (savedData) {
         const parsed = JSON.parse(savedData);
-        currentModuleIndex = parsed.currentModuleIndex || 0;
-        currentQuestionIndex = parsed.currentQuestionIndex || 0;
         score = parsed.score || 0;
-        
-        if (currentModuleIndex >= gameData.length) {
-            // Juego terminado
-            currentModuleIndex = 0;
-            currentQuestionIndex = 0;
-            score = 0;
-        }
     }
     
     updateScoreUI();
+    
+    btnStartGame.addEventListener('click', startGameAfterLesson);
+    checkBtn.addEventListener('click', validateAnswer);
+
+    renderModuleSelection();
+    showScreen('selection');
+}
+
+function showScreen(screenId) {
+    screenSelection.classList.add('hidden');
+    screenLesson.classList.add('hidden');
+    screenGame.classList.add('hidden');
+
+    if (screenId === 'selection') screenSelection.classList.remove('hidden');
+    else if (screenId === 'lesson') screenLesson.classList.remove('hidden');
+    else if (screenId === 'game') screenGame.classList.remove('hidden');
+}
+
+function renderModuleSelection() {
+    moduleGrid.innerHTML = '';
+    gameData.forEach((mod, index) => {
+        const btn = document.createElement('div');
+        btn.className = 'module-card';
+        btn.innerHTML = `
+            <div class="text-6xl mb-2">${mod.icon}</div>
+            <h3 class="font-bold text-xl text-dark">${mod.title}</h3>
+            <p class="text-sm text-gray-500 mt-2">Módulo ${index + 1}</p>
+        `;
+        btn.addEventListener('click', () => {
+            if(sfxSuccess) sfxSuccess.play().catch(e=>{});
+            startLesson(index);
+        });
+        moduleGrid.appendChild(btn);
+    });
+}
+
+let currentUtterance = null;
+let availableVoices = [];
+
+// Intentar precargar voces
+function loadVoices() {
+    availableVoices = window.speechSynthesis.getVoices();
+}
+if ('speechSynthesis' in window) {
+    window.speechSynthesis.onvoiceschanged = loadVoices;
+    loadVoices();
+}
+
+function speakText(text, voiceParams = {}) {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        currentUtterance = new SpeechSynthesisUtterance(text);
+        
+        currentUtterance.lang = 'es-ES'; // Idioma base
+        currentUtterance.pitch = voiceParams.pitch !== undefined ? voiceParams.pitch : 1.0;
+        currentUtterance.rate = voiceParams.rate !== undefined ? voiceParams.rate : 1.0;
+
+        // Intentar seleccionar una voz diferente si el SO tiene varias en español
+        if (availableVoices.length === 0) loadVoices(); 
+        let esVoices = availableVoices.filter(v => v.lang.startsWith('es'));
+        
+        if (esVoices.length > 0) {
+            let vIndex = voiceParams.voiceIndex || 0;
+            // Asegurar que el índice no supere la cantidad de voces disponibles
+            currentUtterance.voice = esVoices[vIndex % esVoices.length];
+        }
+
+        window.speechSynthesis.speak(currentUtterance);
+    }
+}
+
+function startLesson(index) {
+    currentModuleIndex = index;
+    currentQuestionIndex = 0;
+    const module = gameData[currentModuleIndex];
+    
+    lessonTitle.innerText = `${module.lesson.animalName} dice:`;
+    lessonText.innerText = module.lesson.text;
+    lessonAnimal.innerText = module.lesson.animal;
+    
+    showScreen('lesson');
+    speakText(module.lesson.text, module.lesson.voiceParams);
+}
+
+function startGameAfterLesson() {
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+    }
     renderModuleIndicators();
     loadQuestion();
-
-    // Evento de validación
-    checkBtn.addEventListener('click', validateAnswer);
+    showScreen('game');
 }
 
 function saveProgress() {
@@ -241,32 +332,19 @@ function validateAnswer() {
             saveProgress();
             
             if (currentQuestionIndex >= module.levels.length) {
-                // Siguiente módulo
-                currentModuleIndex++;
-                currentQuestionIndex = 0;
+                // Módulo Terminado -> Volver a Selección
                 consecutiveWins = 0;
                 visualCue.classList.remove('streak-fire');
                 saveProgress();
                 
-                if (currentModuleIndex < gameData.length) {
-                    // Animación de transición de módulo
-                    mainArea.classList.add('slide-out');
-                    if(sfxModule) sfxModule.play().catch(e => {});
-                    
-                    setTimeout(() => {
-                        mainArea.classList.remove('slide-out');
-                        mainArea.classList.add('slide-in');
-                        renderModuleIndicators();
-                        triggerConfetti(true);
-                        loadQuestion();
-                        
-                        setTimeout(() => {
-                            mainArea.classList.remove('slide-in');
-                        }, 600);
-                    }, 600);
-                } else {
-                    showEndScreen();
-                }
+                mainArea.classList.add('slide-out');
+                if(sfxModule) sfxModule.play().catch(e => {});
+                
+                setTimeout(() => {
+                    mainArea.classList.remove('slide-out');
+                    triggerConfetti(true);
+                    showScreen('selection');
+                }, 600);
             } else {
                 loadQuestion();
             }

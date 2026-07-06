@@ -11,6 +11,7 @@ const gameData = [
             animal: "🐶",
             animalName: "Beto el Perro",
             text: "¡Hola! Soy Beto. Antes de jugar, recuerda que las señales rojas nos indican prohibición o que debemos parar. ¡Presta mucha atención a la forma y color de cada señal!",
+            outroText: "¡Guau, eres genial! Has aprendido mucho sobre las señales rojas. ¡No olvides obedecerlas para estar seguro en las calles!",
             voiceParams: { pitch: 0.9, rate: 1.1, voiceIndex: 0 }
         },
         levels: [
@@ -66,6 +67,7 @@ const gameData = [
             animal: "🦊",
             animalName: "Fito el Zorro",
             text: "¡Qué tal! Soy Fito. Los textos instructivos nos dicen paso a paso cómo hacer algo, como lavarnos las manos o armar un juguete. ¡Ordenemos estas oraciones!",
+            outroText: "¡Zorprendente! Armaste todas las instrucciones perfectamente. ¡Ahora eres un experto siguiendo pasos!",
             voiceParams: { pitch: 1.6, rate: 1.2, voiceIndex: 1 }
         },
         levels: [
@@ -87,6 +89,7 @@ const gameData = [
             animal: "🦉",
             animalName: "Oli el Búho",
             text: "¡Saludos! Soy Oli. Los relatos mitológicos y las leyendas están llenos de magia, criaturas fantásticas y misterios. ¡Vamos a descubrir estas oraciones mágicas!",
+            outroText: "¡Hoo hoo, eres muy sabio! Resolviste todos los misterios mágicos. ¡Las leyendas ya no tienen secretos para ti, felicidades!",
             voiceParams: { pitch: 0.4, rate: 0.85, voiceIndex: 2 }
         },
         levels: [

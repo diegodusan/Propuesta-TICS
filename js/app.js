@@ -118,26 +118,41 @@ function speakText(text, voiceParams = {}) {
     }
 }
 
-function startLesson(index) {
+let lessonState = 'intro';
+
+function startLesson(index, isOutro = false) {
     currentModuleIndex = index;
-    currentQuestionIndex = 0;
     const module = gameData[currentModuleIndex];
+    lessonState = isOutro ? 'outro' : 'intro';
     
-    lessonTitle.innerText = `${module.lesson.animalName} dice:`;
-    lessonText.innerText = module.lesson.text;
+    if (!isOutro) {
+        currentQuestionIndex = 0;
+        lessonTitle.innerText = `${module.lesson.animalName} dice:`;
+        lessonText.innerText = module.lesson.text;
+        btnStartGame.innerText = "¡Vamos!";
+        speakText(module.lesson.text, module.lesson.voiceParams);
+    } else {
+        lessonTitle.innerText = `¡Felicidades!`;
+        lessonText.innerText = module.lesson.outroText;
+        btnStartGame.innerText = "Volver al Menú";
+        speakText(module.lesson.outroText, module.lesson.voiceParams);
+    }
+    
     lessonAnimal.innerText = module.lesson.animal;
-    
     showScreen('lesson');
-    speakText(module.lesson.text, module.lesson.voiceParams);
 }
 
 function startGameAfterLesson() {
     if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
     }
-    renderModuleIndicators();
-    loadQuestion();
-    showScreen('game');
+    if (lessonState === 'outro') {
+        showScreen('selection');
+    } else {
+        renderModuleIndicators();
+        loadQuestion();
+        showScreen('game');
+    }
 }
 
 function saveProgress() {
@@ -332,7 +347,7 @@ function validateAnswer() {
             saveProgress();
             
             if (currentQuestionIndex >= module.levels.length) {
-                // Módulo Terminado -> Volver a Selección
+                // Módulo Terminado -> Mostrar Outro
                 consecutiveWins = 0;
                 visualCue.classList.remove('streak-fire');
                 saveProgress();
@@ -343,7 +358,7 @@ function validateAnswer() {
                 setTimeout(() => {
                     mainArea.classList.remove('slide-out');
                     triggerConfetti(true);
-                    showScreen('selection');
+                    startLesson(currentModuleIndex, true);
                 }, 600);
             } else {
                 loadQuestion();
